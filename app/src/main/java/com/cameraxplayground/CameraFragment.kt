@@ -25,6 +25,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.core.view.setPadding
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.cameraxplayground.databinding.FragmentCameraBinding
@@ -85,6 +86,14 @@ class CameraFragment : Fragment() {
         }
         outputDirectory = getOutputDirectory()
         cameraExecutor = Executors.newSingleThreadExecutor()
+
+        binding.galleryBtn.setOnClickListener {
+            findNavController().navigate(
+                CameraFragmentDirections.actionCameraFragmentToGalleryFragment(
+                    outputDirectory.absolutePath
+                )
+            )
+        }
 
         return binding.root
     }
@@ -178,12 +187,12 @@ class CameraFragment : Fragment() {
     private fun setGalleryThumbnail(uri: Uri) {
         //handing over the view from the main thread to the camera thread using post.
         //This is necessary because another thread cannot touch the views in the main thread.
-        binding.gallery.post {
-            binding.gallery.setPadding(4)
-            Glide.with(binding.gallery)
+        binding.galleryBtn.post {
+            binding.galleryBtn.setPadding(4)
+            Glide.with(binding.galleryBtn)
                 .load(uri)
                 .apply(RequestOptions.circleCropTransform())
-                .into(binding.gallery)
+                .into(binding.galleryBtn)
         }
     }
 

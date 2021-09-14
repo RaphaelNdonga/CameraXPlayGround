@@ -3,4 +3,5 @@
     <string name="take_photo">Take a photo</string>
     <string name="switch_camera">Switch the camera</string>
     <string name="gallery">Gallery</string>
+    <string name="share">share</string>
 </resources>

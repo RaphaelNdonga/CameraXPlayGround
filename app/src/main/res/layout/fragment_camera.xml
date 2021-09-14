@@ -30,7 +30,7 @@
         app:layout_constraintTop_toTopOf="@id/camera_capture_button"/>
 
     <ImageButton
-        android:id="@+id/gallery"
+        android:id="@+id/gallery_btn"
         android:layout_width="64dp"
         android:layout_height="64dp"
         android:background="@drawable/ic_circle"
