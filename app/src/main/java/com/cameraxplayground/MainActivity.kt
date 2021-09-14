@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
+import android.net.Uri
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -18,6 +19,9 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
+import androidx.core.view.setPadding
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions
 import com.cameraxplayground.databinding.ActivityMainBinding
 import com.google.common.util.concurrent.ListenableFuture
 import java.io.File
@@ -146,6 +150,9 @@ class MainActivity : AppCompatActivity() {
             object : ImageCapture.OnImageSavedCallback {
                 override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
                     Log.i(TAG, "The file has been saved in ${photoFile.toUri().toString()}")
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        setGalleryThumbnail(photoFile.toUri())
+                    }
                 }
 
                 override fun onError(exception: ImageCaptureException) {
@@ -154,6 +161,18 @@ class MainActivity : AppCompatActivity() {
                 }
 
             })
+    }
+
+    private fun setGalleryThumbnail(uri: Uri) {
+        //handing over the view from the main thread to the camera thread using post.
+        //This is necessary because another thread cannot touch the views in the main thread.
+        binding.gallery.post {
+            binding.gallery.setPadding(4)
+            Glide.with(binding.gallery)
+                .load(uri)
+                .apply(RequestOptions.circleCropTransform())
+                .into(binding.gallery)
+        }
     }
 
     private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
