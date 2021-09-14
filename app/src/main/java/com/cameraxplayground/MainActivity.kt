@@ -19,6 +19,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import com.cameraxplayground.databinding.ActivityMainBinding
+import com.google.common.util.concurrent.ListenableFuture
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
@@ -30,11 +31,15 @@ class MainActivity : AppCompatActivity() {
     private lateinit var outputDirectory: File
     private lateinit var cameraExecutor: ExecutorService
     private var imageCapture: ImageCapture? = null
+    private lateinit var cameraProviderFuture: ListenableFuture<ProcessCameraProvider>
+    private var cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        cameraProviderFuture = ProcessCameraProvider.getInstance(this)
 
         if (allPermissionsGranted()) {
             startCamera()
@@ -47,6 +52,9 @@ class MainActivity : AppCompatActivity() {
                 animateScreenFlash()
             }
         }
+        binding.switchCam.setOnClickListener {
+            switchCamera()
+        }
         outputDirectory = getOutputDirectory()
         cameraExecutor = Executors.newSingleThreadExecutor()
     }
@@ -57,8 +65,8 @@ class MainActivity : AppCompatActivity() {
             binding.root.foreground = ColorDrawable(Color.WHITE)
             binding.root.postDelayed({
                 binding.root.foreground = null
-            },50L)
-        },100L)
+            }, 50L)
+        }, 100L)
     }
 
     override fun onRequestPermissionsResult(
@@ -90,13 +98,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startCamera() {
-        val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
+        //Add listener ensures that we have obtained the camera successfully and is now available for use
         cameraProviderFuture.addListener(Runnable {
             val preview = Preview.Builder().build().also {
                 it.setSurfaceProvider(binding.viewFinder.surfaceProvider)
             }
             val cameraProvider = cameraProviderFuture.get()
-            val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
 
             imageCapture = ImageCapture.Builder().build()
 
@@ -109,6 +116,19 @@ class MainActivity : AppCompatActivity() {
                 Log.d(TAG, "Use case binding failed. $exc")
             }
         }, ContextCompat.getMainExecutor(this))
+    }
+
+    private fun switchCamera() {
+        if (hasBackCamera() && hasFrontCamera()) {
+            cameraSelector = if (cameraSelector == CameraSelector.DEFAULT_FRONT_CAMERA) {
+                CameraSelector.DEFAULT_BACK_CAMERA
+            } else {
+                CameraSelector.DEFAULT_FRONT_CAMERA
+            }
+        } else {
+            Toast.makeText(this, "The camera has not been found", Toast.LENGTH_LONG).show()
+        }
+        startCamera()
     }
 
     private fun takePhoto() {
@@ -138,6 +158,16 @@ class MainActivity : AppCompatActivity() {
 
     private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
         ActivityCompat.checkSelfPermission(baseContext, it) == PackageManager.PERMISSION_GRANTED
+    }
+
+    private fun hasBackCamera(): Boolean {
+        val cameraProvider = cameraProviderFuture.get()
+        return cameraProvider.hasCamera(CameraSelector.DEFAULT_BACK_CAMERA)
+    }
+
+    private fun hasFrontCamera(): Boolean {
+        val cameraProvider = cameraProviderFuture.get()
+        return cameraProvider.hasCamera(CameraSelector.DEFAULT_FRONT_CAMERA)
     }
 
     companion object {
