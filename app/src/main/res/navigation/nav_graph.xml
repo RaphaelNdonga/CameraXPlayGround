@@ -18,7 +18,6 @@
         android:label="GalleryFragment" >
         <argument
             android:name="directoryPath"
-            app:argType="string"
-            app:nullable="true" />
+            app:argType="string" />
     </fragment>
 </navigation>

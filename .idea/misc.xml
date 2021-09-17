@@ -3,7 +3,19 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="app/src/main/res/drawable/color_selector.xml" value="0.13240740740740742" />
+        <entry key="app/src/main/res/drawable/ic_circle.xml" value="0.16111111111111112" />
+        <entry key="app/src/main/res/drawable/ic_outer_circle.xml" value="0.16111111111111112" />
+        <entry key="app/src/main/res/drawable/ic_round.xml" value="0.209375" />
+        <entry key="app/src/main/res/drawable/ic_share.xml" value="0.13240740740740742" />
+        <entry key="app/src/main/res/drawable/ic_shutter.xml" value="0.16111111111111112" />
+        <entry key="app/src/main/res/drawable/ic_shutter_normal.xml" value="0.16111111111111112" />
+        <entry key="app/src/main/res/drawable/ic_shutter_pressed.xml" value="0.16111111111111112" />
+        <entry key="app/src/main/res/drawable/ic_switch_camera.xml" value="0.16111111111111112" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/fragment_camera.xml" value="0.19322916666666667" />
+        <entry key="app/src/main/res/layout/fragment_gallery.xml" value="0.1" />
+        <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" value="0.13240740740740742" />
       </map>
     </option>
   </component>
