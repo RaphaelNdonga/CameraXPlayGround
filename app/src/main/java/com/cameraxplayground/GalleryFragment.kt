@@ -1,10 +1,14 @@
 package com.cameraxplayground
 
+import android.app.AlertDialog
+import android.media.MediaScannerConnection
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.cameraxplayground.databinding.FragmentGalleryBinding
@@ -19,7 +23,8 @@ class GalleryFragment : Fragment() {
         override fun getItemCount(): Int = mediaDir.size
 
         override fun createFragment(position: Int): Fragment {
-            return mediaDir[position].let { PhotoFragment.create(it) }
+            Log.i("GalleryFragment", "The position is $position")
+            return PhotoFragment.create(mediaDir[position])
         }
     }
 
@@ -31,11 +36,11 @@ class GalleryFragment : Fragment() {
         binding = FragmentGalleryBinding.inflate(layoutInflater, container, false)
 
         val rootDir = File(galleryArgs.directoryPath)
-        val extensionPath = arrayOf("jpg")
+        val extensionPath = arrayOf("JPG")
 
-        mediaDir = rootDir.listFiles { file->
-            extensionPath.contains(file.extension)
-        }?.sortedDescending()?.toMutableList()?: mutableListOf()
+        mediaDir = rootDir.listFiles { file ->
+            extensionPath.contains(file.extension.uppercase())
+        }?.sortedDescending()?.toMutableList() ?: mutableListOf()
 
         binding.viewPager.adapter = GalleryViewPagerAdapter(this)
 
@@ -43,5 +48,42 @@ class GalleryFragment : Fragment() {
 
 
         return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        binding.deleteIcon.setOnClickListener {
+            val currentItem = binding.viewPager.currentItem
+            Log.i("GalleryFragment", "The position is $currentItem")
+            mediaDir.getOrNull(currentItem)?.let { mediaFile ->
+                AlertDialog.Builder(requireContext())
+                    .setPositiveButton("Delete") { _, _ ->
+                        mediaFile.delete()
+
+                        //Notify other apps of the deletion
+                        MediaScannerConnection.scanFile(
+                            requireContext(),
+                            arrayOf(mediaFile.absolutePath),
+                            null,
+                            null
+                        )
+
+                        mediaDir.removeAt(currentItem)
+                        Log.i("GalleryFragment", "The deleted position is $currentItem")
+                        binding.viewPager.adapter?.notifyItemRemoved(currentItem)
+
+                        if (mediaDir.isNullOrEmpty()) {
+                            findNavController().navigateUp()
+                        }
+                    }
+                    .setNegativeButton("Cancel") { _, _ -> }
+                    .setTitle("Confirm")
+                    .setMessage("Are you sure you want to delete this file?")
+                    .create().show()
+            }
+        }
+        binding.shareIcon.setOnClickListener {
+
+        }
     }
 }
